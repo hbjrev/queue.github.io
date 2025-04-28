@@ -14,7 +14,7 @@ local humanoid = character:WaitForChild("Humanoid")
 local lobbyPlaceId = 116495829188952
 local mainGamePlaceId = 70876832253163
 local apiUrl = "https://games.roblox.com/v1/games/" .. lobbyPlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-local maxPlayersAllowed = 7 -- If more than this, teleport again
+local maxPlayersAllowed = 9 -- If more than this, teleport again
 
 -- Function to get a low-player server
 local function getLowPlayerServer(cursor)
@@ -73,7 +73,7 @@ end
 -- Define positions for back-and-forth movement
 local pointA = Vector3.new(45, 8, 91)
 local pointB = Vector3.new(45, 8, 154)
-local moveSpeed = 16 -- Normal walking speed
+local moveSpeed = 24 -- Normal walking speed
 
 -- Function to disable collisions (noclip effect)
 local function enableNoClip()
