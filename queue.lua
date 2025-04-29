@@ -1,6 +1,7 @@
 -- Wait for game to load
 repeat wait() until game:IsLoaded()
 
+local lobbyPlaceId = 116495829188952 -- Specify the lobby PlaceId
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -51,21 +52,18 @@ end
 
 -- Function to check if the player has been teleported
 local function hasBeenTeleported()
-    return game.PlaceId ~= game.PlaceId -- Placeholder logic
+    return game.PlaceId ~= lobbyPlaceId -- Only consider teleported if we've left the lobby
 end
 
 -- Start the remote firing loop in a separate thread
-task.spawn(fireCreatePartyRemote)
-
--- Main loop: Move back and forth until teleported
 local function startTeleportationLoop()
     enableNoClip() -- Enable noclip to prevent movement issues
-    
+
     while not hasBeenTeleported() do
         local tweenA = tweenToPosition(pointA)
         tweenA.Completed:Wait() -- Wait for movement to finish
         if hasBeenTeleported() then break end
-        
+
         local tweenB = tweenToPosition(pointB)
         tweenB.Completed:Wait() -- Wait for movement to finish
         if hasBeenTeleported() then break end
@@ -74,5 +72,13 @@ local function startTeleportationLoop()
     print("Successfully Teleported. Stopping teleportation & remote firing.")
 end
 
--- Start the teleportation loop
-startTeleportationLoop()
+-- Only execute if the current PlaceId matches the lobby PlaceId
+if game.PlaceId == lobbyPlaceId then
+    -- Start the remote firing loop
+    task.spawn(fireCreatePartyRemote)
+
+    -- Start the teleportation loop
+    startTeleportationLoop()
+else
+    print("Not in the local lobby. Script will not run.")
+end
