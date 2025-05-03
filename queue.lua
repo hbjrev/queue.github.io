@@ -14,7 +14,7 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 -- Define positions for back-and-forth movement
 local pointA = Vector3.new(45, 8, 91)
 local pointB = Vector3.new(45, 8, 154)
-local moveSpeed = 16 -- Normal walking speed
+local moveSpeed = 20 -- Normal walking speed
 
 -- Function to disable collisions (noclip effect)
 local function enableNoClip()
@@ -46,6 +46,8 @@ local function fireCreatePartyRemote()
                 ["gameMode"] = "Normal"
             }
         }
+
+        print("Firing C_CreateParty remote with args:", args) -- Debugging statement
         ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RemotePromise"):WaitForChild("Remotes"):WaitForChild("C_CreateParty"):FireServer(unpack(args))
         wait(0.1) -- Small delay to prevent crashes
     end
@@ -105,7 +107,7 @@ if game.PlaceId == lobbyPlaceId then
 
     -- Start the delayed teleportation check in parallel
     task.spawn(function()
-        wait(30) -- Wait for 40 seconds
+        wait(40) -- Wait for 40 seconds
 
         if game.PlaceId == lobbyPlaceId then
             local serverId, cursor = nil, nil
