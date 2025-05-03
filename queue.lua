@@ -14,7 +14,7 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 -- Define positions for back-and-forth movement
 local pointA = Vector3.new(45, 8, 91)
 local pointB = Vector3.new(45, 8, 154)
-local moveSpeed = 16 -- Normal walking speed
+local moveSpeed = 20 -- Normal walking speed
 
 -- Function to disable collisions (noclip effect)
 local function enableNoClip()
@@ -108,7 +108,7 @@ if game.PlaceId == lobbyPlaceId then
 
     -- Start the delayed teleportation check in parallel
     task.spawn(function()
-        wait(40) -- Wait for 40 seconds
+        wait(35) -- Wait for 40 seconds
 
         if game.PlaceId == lobbyPlaceId then
             local serverId, cursor = nil, nil
