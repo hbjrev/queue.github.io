@@ -5,6 +5,8 @@ local lobbyPlaceId = 116495829188952 -- Specify the lobby PlaceId
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
@@ -44,8 +46,7 @@ local function fireCreatePartyRemote()
                 ["gameMode"] = "Normal"
             }
         }
-
-        game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("RemotePromise"):WaitForChild("Remotes"):WaitForChild("C_CreateParty"):FireServer(unpack(args))
+        ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RemotePromise"):WaitForChild("Remotes"):WaitForChild("C_CreateParty"):FireServer(unpack(args))
         wait(0.1) -- Small delay to prevent crashes
     end
 end
@@ -55,7 +56,29 @@ local function hasBeenTeleported()
     return game.PlaceId ~= lobbyPlaceId -- Only consider teleported if we've left the lobby
 end
 
--- Start the remote firing loop in a separate thread
+-- Function to get a low-player server
+local function getLowPlayerServer(cursor)
+    local apiUrl = "https://games.roblox.com/v1/games/" .. lobbyPlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+    local url = apiUrl .. ((cursor and "&cursor=" .. cursor) or "")
+    local success, response = pcall(function()
+        return game:HttpGet(url)
+    end)
+
+    if success then
+        local data = HttpService:JSONDecode(response)
+        for _, server in pairs(data.data) do
+            if server.playing < 3 and server.id ~= game.JobId then -- Adjust maxPlayersAllowed if needed
+                return server.id
+            end
+        end
+        return data.nextPageCursor
+    end
+
+    warn("Failed to fetch server list.")
+    return nil
+end
+
+-- Main teleportation loop
 local function startTeleportationLoop()
     enableNoClip() -- Enable noclip to prevent movement issues
 
@@ -72,13 +95,37 @@ local function startTeleportationLoop()
     print("Successfully Teleported. Stopping teleportation & remote firing.")
 end
 
--- Only execute if the current PlaceId matches the lobby PlaceId
+-- Only execute if the current PlaceId matches the lobbyPlaceId
 if game.PlaceId == lobbyPlaceId then
     -- Start the remote firing loop
     task.spawn(fireCreatePartyRemote)
 
     -- Start the teleportation loop
-    startTeleportationLoop()
+    task.spawn(startTeleportationLoop)
+
+    -- Start the delayed teleportation check in parallel
+    task.spawn(function()
+        wait(30) -- Wait for 40 seconds
+
+        if game.PlaceId == lobbyPlaceId then
+            local serverId, cursor = nil, nil
+            repeat
+                cursor = getLowPlayerServer(cursor)
+                if cursor and not serverId then
+                    serverId = cursor
+                end
+            until serverId or not cursor
+
+            if serverId then
+                print("Teleporting to a low-player server...")
+                TeleportService:TeleportToPlaceInstance(lobbyPlaceId, serverId, player)
+            else
+                warn("No suitable server found.")
+            end
+        else
+            print("Not in the lobby, skipping server hop.")
+        end
+    end)
 else
     print("Not in the local lobby. Script will not run.")
 end
