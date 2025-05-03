@@ -14,7 +14,7 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 -- Define positions for back-and-forth movement
 local pointA = Vector3.new(45, 8, 91)
 local pointB = Vector3.new(45, 8, 154)
-local moveSpeed = 20 -- Normal walking speed
+local moveSpeed = 16 -- Normal walking speed
 
 -- Function to disable collisions (noclip effect)
 local function enableNoClip()
@@ -37,18 +37,19 @@ local function tweenToPosition(targetPosition)
     return tween
 end
 
--- Function to fire the create party remote endlessly
+-- Function to fire the create party remote endlessly (Updated path & args)
 local function fireCreatePartyRemote()
     while true do
         local args = {
-            [1] = {
-                ["maxPlayers"] = 1,
-                ["gameMode"] = "Normal"
+            {
+                trainId = "default", -- Required by the new game system
+                maxMembers = 1,      -- Ensures solo party creation
+                gameMode = "Normal"  -- Keeps the correct mode
             }
         }
 
-        print("Firing C_CreateParty remote with args:", args) -- Debugging statement
-        ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RemotePromise"):WaitForChild("Remotes"):WaitForChild("C_CreateParty"):FireServer(unpack(args))
+        print("Firing CreateParty remote with args:", args) -- Debugging statement
+        ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Network"):WaitForChild("RemoteEvent"):WaitForChild("CreateParty"):FireServer(unpack(args))
         wait(0.1) -- Small delay to prevent crashes
     end
 end
