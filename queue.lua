@@ -14,7 +14,7 @@ local rootPart = character:WaitForChild("HumanoidRootPart")
 -- Define positions for back-and-forth movement
 local pointA = Vector3.new(45, 8, 91)
 local pointB = Vector3.new(45, 8, 154)
-local moveSpeed = 20 -- Normal walking speed
+local moveSpeed = 21 -- Normal walking speed
 
 -- Function to disable collisions (noclip effect)
 local function enableNoClip()
